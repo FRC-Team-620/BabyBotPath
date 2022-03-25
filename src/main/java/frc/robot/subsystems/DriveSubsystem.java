@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.SerialPort.Port;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 
@@ -49,10 +50,15 @@ public class DriveSubsystem extends SubsystemBase {
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
+    leftMotor1.restoreFactoryDefaults();
+    leftMotor2.restoreFactoryDefaults();
+    rightMotor1.restoreFactoryDefaults();
+    rightMotor2.restoreFactoryDefaults();
     // We need to invert one side of the drivetrain so that positive voltages
     // result in both sides moving forward. Depending on how your robot's
     // gearbox is constructed, you might have to invert the left side instead.
     m_rightMotors.setInverted(true);
+    m_leftMotors.setInverted(false);
 
     // Sets the distance per pulse for the encoders
     m_leftEncoder.setPositionConversionFactor(DriveConstants.kEncoderDistancePerPulse);
@@ -69,7 +75,31 @@ public class DriveSubsystem extends SubsystemBase {
   public void periodic() {
     // Update the odometry in the periodic block
     m_odometry.update(
-        m_gyro.getRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition());
+        m_gyro.getRotation2d(), getLeftPosition(), getRightPosition());
+
+    pushOdometry();
+  }
+
+  public double getLeftPosition() {
+    return m_leftEncoder.getPosition();
+  }
+
+  public double getRightPosition() {
+    return -m_rightEncoder.getPosition();
+  }
+
+  public double getLeftVelocity() {
+    return m_leftEncoder.getVelocity();
+  }
+
+  public double getRightVelocity() {
+    return -m_rightEncoder.getVelocity();
+  }
+
+  private void pushOdometry() {
+    SmartDashboard.putNumber("L Encoder", getLeftPosition());
+    SmartDashboard.putNumber("R Encoder", getRightPosition());
+    SmartDashboard.putNumber("Gyro", getHeading());
   }
 
   /**
@@ -87,7 +117,7 @@ public class DriveSubsystem extends SubsystemBase {
    * @return The current wheel speeds.
    */
   public DifferentialDriveWheelSpeeds getWheelSpeeds() {
-    return new DifferentialDriveWheelSpeeds(m_leftEncoder.getVelocity(), m_rightEncoder.getVelocity());
+    return new DifferentialDriveWheelSpeeds(getLeftVelocity(), getRightVelocity());
   }
 
   /**
@@ -134,7 +164,8 @@ public class DriveSubsystem extends SubsystemBase {
    * @return the average of the two encoder readings
    */
   public double getAverageEncoderDistance() {
-    return (m_leftEncoder.getPosition() + m_rightEncoder.getPosition()) / 2.0;
+    // return (m_leftEncoder.getPosition() + m_rightEncoder.getPosition()) / 2.0;
+    return (getLeftPosition() + getRightPosition()) / 2;
   }
 
   /**
@@ -185,6 +216,6 @@ public class DriveSubsystem extends SubsystemBase {
    * @return The turn rate of the robot, in degrees per second
    */
   public double getTurnRate() {
-    return -m_gyro.getRate();
+    return m_gyro.getRate();
   }
 }
