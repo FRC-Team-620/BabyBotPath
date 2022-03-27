@@ -38,10 +38,36 @@ import frc.robot.subsystems.DriveSubsystem;
  */
 public class RobotContainer {
         // The robot's subsystems
-        private final DriveSubsystem m_robotDrive = new DriveSubsystem();
-
+        public final DriveSubsystem m_robotDrive = new DriveSubsystem();
+        // Create a voltage constraint to ensure we don't accelerate too fast
+        DifferentialDriveVoltageConstraint autoVoltageConstraint = new DifferentialDriveVoltageConstraint(
+                        new SimpleMotorFeedforward(
+                                        DriveConstants.ksVolts,
+                                        DriveConstants.kvVoltSecondsPerMeter,
+                                        DriveConstants.kaVoltSecondsSquaredPerMeter),
+                        DriveConstants.kDriveKinematics,
+                        10);
         // The driver's controller
         XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
+        // Create config for trajectory
+        TrajectoryConfig config = new TrajectoryConfig(
+                        AutoConstants.kMaxSpeedMetersPerSecond,
+                        AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+                                        // Add kinematics to ensure max speed is actually obeyed
+                                        .setKinematics(DriveConstants.kDriveKinematics)
+                                        // Apply the voltage constraint
+                                        .addConstraint(autoVoltageConstraint);
+
+        // An example trajectory to follow. All units in meters.
+        public Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
+                        // Start at the origin facing the +X direction
+                        new Pose2d(10, 0, new Rotation2d(0)),
+                        // Pass through these two interior waypoints, making an 's' curve path
+                        List.of(new Translation2d(11, 1), new Translation2d(12, -1)),
+                        // End 3 meters straight ahead of where we started, facing forward
+                        new Pose2d(13, 0, new Rotation2d(0)),
+                        // Pass config
+                        config);
 
         /**
          * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -52,14 +78,14 @@ public class RobotContainer {
 
                 // Configure default commands
                 // Set the default drive command to split-stick arcade drive
-                m_robotDrive.setDefaultCommand(
-                                // A split-stick arcade command, with forward/backward controlled by the left
-                                // hand, and turning controlled by the right.
-                                new RunCommand(
-                                                () -> m_robotDrive.arcadeDrive(
-                                                                -m_driverController.getLeftY(),
-                                                                -m_driverController.getRightX()),
-                                                m_robotDrive));
+                // m_robotDrive.setDefaultCommand(
+                //                 // A split-stick arcade command, with forward/backward controlled by the left
+                //                 // hand, and turning controlled by the right.
+                //                 new RunCommand(
+                //                                 () -> m_robotDrive.arcadeDrive(
+                //                                                 -m_driverController.getLeftY(),
+                //                                                 -m_driverController.getRightX()),
+                //                                 m_robotDrive));
         }
 
         /**
@@ -84,35 +110,7 @@ public class RobotContainer {
          * @return the command to run in autonomous
          */
         public Command getAutonomousCommand() {
-                // Create a voltage constraint to ensure we don't accelerate too fast
-                var autoVoltageConstraint = new DifferentialDriveVoltageConstraint(
-                                new SimpleMotorFeedforward(
-                                                DriveConstants.ksVolts,
-                                                DriveConstants.kvVoltSecondsPerMeter,
-                                                DriveConstants.kaVoltSecondsSquaredPerMeter),
-                                DriveConstants.kDriveKinematics,
-                                10);
-
-                // Create config for trajectory
-                TrajectoryConfig config = new TrajectoryConfig(
-                                AutoConstants.kMaxSpeedMetersPerSecond,
-                                AutoConstants.kMaxAccelerationMetersPerSecondSquared)
-                                                // Add kinematics to ensure max speed is actually obeyed
-                                                .setKinematics(DriveConstants.kDriveKinematics)
-                                                // Apply the voltage constraint
-                                                .addConstraint(autoVoltageConstraint);
-
-                // An example trajectory to follow. All units in meters.
-                Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
-                                // Start at the origin facing the +X direction
-                                new Pose2d(0, 0, new Rotation2d(0)),
-                                // Pass through these two interior waypoints, making an 's' curve path
-                                List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
-                                // End 3 meters straight ahead of where we started, facing forward
-                                new Pose2d(3, 0, new Rotation2d(0)),
-                                // Pass config
-                                config);
-
+                m_robotDrive.resetOdometry(exampleTrajectory.getInitialPose());
                 RamseteCommand ramseteCommand = new RamseteCommand(
                                 exampleTrajectory,
                                 m_robotDrive::getPose,
@@ -130,7 +128,7 @@ public class RobotContainer {
                                 m_robotDrive);
 
                 // Reset odometry to the starting pose of the trajectory.
-                m_robotDrive.resetOdometry(exampleTrajectory.getInitialPose());
+               
 
                 // Run path following command, then stop at the end.
                 return ramseteCommand.andThen(() -> m_robotDrive.tankDriveVolts(0, 0));

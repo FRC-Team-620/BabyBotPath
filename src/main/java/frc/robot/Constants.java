@@ -59,4 +59,13 @@ public final class Constants {
     public static final double kRamseteB = 2;
     public static final double kRamseteZeta = 0.7;
   }
+  public static class SimConstants{
+    public static final double kSimDrivekVLinear = 1.98;
+    public static final double ksimDrivekALinear = 0.2;
+    public static final double ksimDrivekVAngular = 1.5;
+    public static final double kSimDrivekAAngular = 0.3;
+    
+    public static final double gearRatio = 1;
+    public static final double kSimUpdateTime = 0.02;
+  }
 }
