@@ -25,7 +25,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
-import frc.robot.subsystems.DriveSubsystem;
+//import frc.robot.subsystems.DriveSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -38,7 +38,7 @@ import frc.robot.subsystems.DriveSubsystem;
  */
 public class RobotContainer {
         // The robot's subsystems
-        public final DriveSubsystem m_robotDrive = new DriveSubsystem();
+        //public final DriveSubsystem m_robotDrive = new DriveSubsystem();
         // Create a voltage constraint to ensure we don't accelerate too fast
         DifferentialDriveVoltageConstraint autoVoltageConstraint = new DifferentialDriveVoltageConstraint(
                         new SimpleMotorFeedforward(
@@ -74,7 +74,7 @@ public class RobotContainer {
          */
         public RobotContainer() {
                 // Configure the button bindings
-                configureButtonBindings();
+                //configureButtonBindings();
 
                 // Configure default commands
                 // Set the default drive command to split-stick arcade drive
@@ -97,40 +97,40 @@ public class RobotContainer {
          * passing it to a
          * {@link JoystickButton}.
          */
-        private void configureButtonBindings() {
-                // Drive at half speed when the right bumper is held
-                new JoystickButton(m_driverController, Button.kRightBumper.value)
-                                .whenPressed(() -> m_robotDrive.setMaxOutput(0.5))
-                                .whenReleased(() -> m_robotDrive.setMaxOutput(1));
-        }
+        // private void configureButtonBindings() {
+        //         // Drive at half speed when the right bumper is held
+        //         new JoystickButton(m_driverController, Button.kRightBumper.value)
+        //                         .whenPressed(() -> m_robotDrive.setMaxOutput(0.5))
+        //                         .whenReleased(() -> m_robotDrive.setMaxOutput(1));
+        // }
 
-        /**
-         * Use this to pass the autonomous command to the main {@link Robot} class.
-         *
-         * @return the command to run in autonomous
-         */
-        public Command getAutonomousCommand() {
-                m_robotDrive.resetOdometry(exampleTrajectory.getInitialPose());
-                RamseteCommand ramseteCommand = new RamseteCommand(
-                                exampleTrajectory,
-                                m_robotDrive::getPose,
-                                new RamseteController(),
-                                new SimpleMotorFeedforward(
-                                                DriveConstants.ksVolts,
-                                                DriveConstants.kvVoltSecondsPerMeter,
-                                                DriveConstants.kaVoltSecondsSquaredPerMeter),
-                                DriveConstants.kDriveKinematics,
-                                m_robotDrive::getWheelSpeeds,
-                                new PIDController(DriveConstants.kPDriveVel, 0, 0),
-                                new PIDController(DriveConstants.kPDriveVel, 0, 0),
-                                // RamseteCommand passes volts to the callback
-                                m_robotDrive::tankDriveVolts,
-                                m_robotDrive);
+        // /**
+        //  * Use this to pass the autonomous command to the main {@link Robot} class.
+        //  *
+        //  * @return the command to run in autonomous
+        //  */
+        // public Command getAutonomousCommand() {
+        //         m_robotDrive.resetOdometry(exampleTrajectory.getInitialPose());
+        //         RamseteCommand ramseteCommand = new RamseteCommand(
+        //                         exampleTrajectory,
+        //                         m_robotDrive::getPose,
+        //                         new RamseteController(),
+        //                         new SimpleMotorFeedforward(
+        //                                         DriveConstants.ksVolts,
+        //                                         DriveConstants.kvVoltSecondsPerMeter,
+        //                                         DriveConstants.kaVoltSecondsSquaredPerMeter),
+        //                         DriveConstants.kDriveKinematics,
+        //                         m_robotDrive::getWheelSpeeds,
+        //                         new PIDController(DriveConstants.kPDriveVel, 0, 0),
+        //                         new PIDController(DriveConstants.kPDriveVel, 0, 0),
+        //                         // RamseteCommand passes volts to the callback
+        //                         m_robotDrive::tankDriveVolts,
+        //                         m_robotDrive);
 
-                // Reset odometry to the starting pose of the trajectory.
+        //         // Reset odometry to the starting pose of the trajectory.
                
 
-                // Run path following command, then stop at the end.
-                return ramseteCommand.andThen(() -> m_robotDrive.tankDriveVolts(0, 0));
-        }
+        //         // Run path following command, then stop at the end.
+        //         return ramseteCommand.andThen(() -> m_robotDrive.tankDriveVolts(0, 0));
+        // }
 }
